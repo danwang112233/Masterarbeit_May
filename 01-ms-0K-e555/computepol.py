@@ -38,17 +38,17 @@ def pol ( filename, simbox ):
     d.tselect.one( tlast )   # Select the last timestep
     d.aselect.all( tlast )   # Select all the atomic displacements of tlast
 
-    # Core Shell charges taken from [Vielma et al 2013]
-    zBaCore  =  4.859
-    zBaShell = -2.948
-    zTiCore  =  4.555
-    zTiShell = -1.615    
-    zO1Core  =  1.058
-    zO1Shell = -2.675
-    zO2Core  =  1.058
-    zO2Shell = -2.675
-    zO3Core  =  1.058
-    zO3Shell = -2.675
+    # Core Shell charges taken from Endres 2015[Vielma et al 2013]
+    zBaCore  =  5.62#4.859
+    zBaShell = -3.76#-2.948
+    zTiCore  = 4.76# 4.555
+    zTiShell = -1.58#-1.615    
+    zO1Core  =  0.91#1.058
+    zO1Shell = -2.59#-2.675
+    zO2Core  =  0.91#1.058
+    zO2Shell = -2.59#-2.675
+    zO3Core  =  0..91#1.058
+    zO3Shell = -2.59#-2.675
 
     # Read atomic displacements of Ba, Ti, O1, O2, and O3 as a numpy array
     natoms = 10 *(n**3)
