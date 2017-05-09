@@ -40,7 +40,7 @@ ext_ef      = 0.0000                        # Strengh of electric field
 ex=ey=ez    = str(ext_ef/math.sqrt(3.0))    # Electric field vector \E
 stp_ef      = 0.005                         # \delta E
 #aef_ef      = range( 1, -20,-1)             # Range of \E : a-e-f [Endres 2015]
-abc_ef      = range(-1,  1, 0.1)             # Range of \E : a-b-c [Endres 2015]
+abc_ef      = range(-10,  10, 1)             # Range of \E : a-b-c [Endres 2015]
 simbox      = { 'a' : a,'n' : n, 'alpha' : alpha }
 #-------------------------------------------------SIMULATION BOX SETTINGS
 alpha_r    = alpha * math.pi / 180.0
