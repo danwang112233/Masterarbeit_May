@@ -9,7 +9,7 @@
 
 units 		metal
 dimension	3
-boundary	p	p	p
+boundary	p	p	s
 atom_style	full
 
 # ----------------------- ATOM DEFINITION ----------------------------
