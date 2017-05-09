@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #-------------------------------------------------LATTICE PARAMETER a
-a="4.010"
+a="3.996"
 
 #-------------------------------------------------LATTICE PARAMETER alpha
-alpha="89.81"
+alpha="89.85"
 
 #-------------------------------------------------REPLICAS IN EACH DIRECTION
-n="5"
+n="6"
 
 #-------------------------------------------------GENERATE DATA FILE
 python molsetup.py $a $n
