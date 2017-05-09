@@ -47,7 +47,7 @@ def pol ( filename, simbox ):
     zO1Shell = -2.59#-2.675
     zO2Core  =  0.91#1.058
     zO2Shell = -2.59#-2.675
-    zO3Core  =  0..91#1.058
+    zO3Core  =  0.91#1.058
     zO3Shell = -2.59#-2.675
 
     # Read atomic displacements of Ba, Ti, O1, O2, and O3 as a numpy array
