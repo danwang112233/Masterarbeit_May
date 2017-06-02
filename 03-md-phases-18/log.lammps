@@ -1,0 +1,94 @@
+LAMMPS (7 Sep 2016)
+# Input file for lammps simulation using the Isotropic-anharmonic Shell Model
+# proposed by Vielma and Schneider based on PBE Generalized Gradient
+# Approximation(GGA) to Density Functional Theory(DFT):
+# [Vielma Schneider 2013](http://dx.doi.org/10.1063/1.4827475)
+
+# Vishal Boddu, June 2016
+
+# ------------------------ INITIALIZATION ---------------------------------
+
+units 		metal
+dimension	3
+boundary	p	p	p
+atom_style	full
+
+# ----------------------- ATOM DEFINITION ----------------------------
+
+fix csinfo all property/atom i_CSID
+read_data atom.data fix csinfo NULL CS-Info
+  orthogonal box = (0 0 0) to (40.1 40.1 72.18)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  18000 atoms
+  scanning bonds ...
+  1 = max bonds/atom
+  reading bonds ...
+  9000 bonds
+  1 = max # of 1-2 neighbors
+  0 = max # of 1-3 neighbors
+  0 = max # of 1-4 neighbors
+  1 = max # of special neighbors
+
+#change_box all x scale ${a} y scale ${b} z scale ${c} remap
+#change_box all triclinic xy delta ${XY} xz delta ${XZ} yz delta ${YZ} remap
+#change_box all triclinic xy delta 0.0 xz delta 0.0 yz delta 0.0 remap
+
+group cores type 1 3 5
+9000 atoms in group cores
+group shells type 2 4 6
+9000 atoms in group shells
+
+neighbor 0.5 bin
+neigh_modify delay 10 check yes
+comm_modify vel yes
+
+# ------------------------ FORCE FIELDS ------------------------------
+
+#kspace_style ewald 1.0e-6
+#pair_style   born/coul/long/cs 8.0
+pair_style   born/coul/wolf/cs 0.25 16.0 14.5
+#pair_style   born/coul/wolf 0.25 16.0 14.5
+
+#------------------------ A,  rho, sigma=0,     C,      D
+pair_coeff	*	*	 0.0000	1.0000	0.000	0.0000	0.000
+pair_coeff	2	6	7149.81	0.3019	0.000	0.0000	0.000
+pair_coeff	4	6	7200.27	0.2303	0.000	0.0000	0.000
+pair_coeff	6	6	3719.60	0.3408	0.000	597.17	0.000
+pair_modify tail no
+
+bond_style class2
+bond_coeff	1	0.0	149.255	0.0		   0.0000000
+bond_coeff	2	0.0	153.070	0.0		 20.83333333
+bond_coeff	3	0.0	 18.465	0.0		208.33333333
+change_box all triclinic xy delta 0.239357505586 yz delta 0.132976391992 xz delta 0.132976391992 remap
+  triclinic box = (0 0 0) to (40.1 40.1 72.18) with tilt (0 0 0)
+  triclinic box = (0 0 0) to (40.1 40.1 72.18) with tilt (0.239358 0 0)
+  triclinic box = (0 0 0) to (40.1 40.1 72.18) with tilt (0.239358 0 0.132976)
+  triclinic box = (0 0 0) to (40.1 40.1 72.18) with tilt (0.239358 0.132976 0.132976)
+compute dr all displace/atom
+reset_timestep 0
+dump dump_positions all atom 1000 atomdump
+dump dump_displace all custom 1000 displdump id type c_dr[1] c_dr[2] c_dr[3]
+thermo 100
+thermo_style custom step etotal pe ke fnorm ecoul elong ebond temp press pxx pyy pzz lx ly lz
+compute CSequ all temp/cs cores shells
+thermo_modify temp CSequ
+fix EF all efield 0.000289 0.000289 0.000289
+fix_modify EF energy yes
+min_style quickmin
+minimize 0.0 1e-04 30000 100000
+WARNING: Resetting reneighboring criteria during minimization (/tmp/iwtm861/spack-stage/spack-stage-WtJHS6/lammps-feature-CORESHELL-wolf/src/min.cpp:168)
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 16.5
+  ghost atom cutoff = 16.5
+  binsize = 8.25 -> bins = 5 5 9
+Memory usage per processor = 17.7461 Mbytes
+Step TotEng PotEng KinEng Fnorm E_coul E_long E_bond Temp Press Pxx Pyy Pzz Lx Ly Lz 
+       0   -215057.98   -215057.98            0   0.19270271   -230072.12            0            0            0   -56313.444   -56363.354   -56245.543   -56331.436         40.1         40.1        72.18 
+     100   -215057.85   -215057.85 1.8547965e-05    0.4567407   -230072.02            0  0.014416423 1.5945472e-05   -56313.009   -56362.916   -56245.105       -56331         40.1         40.1        72.18 
+     200   -215057.89    -215057.9 0.0028189615   0.74616157   -230072.71            0   0.24261748 0.0024234288   -56305.375   -56355.234   -56237.397    -56323.43         40.1         40.1        72.18 
+     300   -215058.41   -215058.41 0.0023260693    3.1634425   -230081.13            0    3.0073415  0.001999695    -56211.96   -56260.969    -56142.93
