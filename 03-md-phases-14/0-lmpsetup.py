@@ -113,27 +113,26 @@ bisect.insort(Tg, 252.5)
 bisect.insort(Tg, 257.5)
 bisect.insort(Tg, 342.5)
 bisect.insort(Tg, 347.5) 
-#for T in rng_T:
-    lmp.command("velocity all scale %d temp CSequ" % (Tg) )
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
-    lmp.command("fix_modify NPT temp CSequ")
-    lmp.command("run %d" %tequilib)
-    lmp.command("unfix NPT")
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
-    lmp.command("fix_modify NPT temp CSequ")
-    lmp.command("run %d" %trun)
-    lmp.command("unfix NPT")
-    lx = lmp.extract_variable( "la", "all", 0 )
-    ly = lmp.extract_variable( "lb", "all", 0 )
-    lz = lmp.extract_variable( "lc", "all", 0 )
-    if rank == 0:
-        lmp.command("variable STEP equal step")
-        step = lmp.extract_variable( "STEP", "all", 0 )
-        temp = float(find_temp( step, f_ave_temp))
-        lat  = find_lat( step, f_ave_lat)
-        POL = np.vstack((POL, np.asarray([temp]+pol("displcoredump", a, alpha, nx, ny, nz) + \
-              [float(lat[0])/nx,float(lat[1])/ny,float(lat[2])/nz ])))
-        print POL
+lmp.command("velocity all scale %d temp CSequ" % (Tg) )
+lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
+lmp.command("fix_modify NPT temp CSequ")
+lmp.command("run %d" %tequilib)
+lmp.command("unfix NPT")
+lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
+lmp.command("fix_modify NPT temp CSequ")
+lmp.command("run %d" %trun)
+lmp.command("unfix NPT")
+lx = lmp.extract_variable( "la", "all", 0 )
+ly = lmp.extract_variable( "lb", "all", 0 )
+lz = lmp.extract_variable( "lc", "all", 0 )
+if rank == 0:
+    lmp.command("variable STEP equal step")
+    step = lmp.extract_variable( "STEP", "all", 0 )
+    temp = float(find_temp( step, f_ave_temp))
+    lat  = find_lat( step, f_ave_lat)
+    POL = np.vstack((POL, np.asarray([temp]+pol("displcoredump", a, alpha, nx, ny, nz) + \
+          [float(lat[0])/nx,float(lat[1])/ny,float(lat[2])/nz ])))
+    print POL
 if rank == 0:
     with open("%d%d%d_pol_%d_%.2f_%.2f.dat" %(nx,ny,nz, Tg, Tdamp, Pdamp), 'w') as file_handle:
         np.savetxt( file_handle, POL, delimiter='\t', header=HEADER, fmt='%.6e')
