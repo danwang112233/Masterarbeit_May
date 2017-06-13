@@ -24,10 +24,11 @@ thermo_flag = 100   # Print thermodynamics info every this many timesteps
 dump_flag   = 1000  # Write pos & displ info to file every this many timesteps
 m_iter      = 30000                 # Maximum iterations of minimizer
 ex=ey=ez    = 0.0005/math.sqrt(3.0) # Electric field vector \E - Init Pol
-Ti          = 5                     # First MD run at Ti
-DT          = 25                     # \delta T
-Tf          = 310                  # Last MS run at Tf-DT
-rng_T       = range(Ti,Tf,DT)       # Range of \T
+#Ti          = 5                     # First MD run at Ti
+#DT          = 25                     # \delta T
+#Tf          = 310                  # Last MS run at Tf-DT
+#rng_T       = range(Ti,Tf,DT)       # Range of \T
+Tg          = 10
 Tdamp       = 0.1
 Pdamp       = 0.1
 tequilib    = 10000
@@ -102,23 +103,23 @@ lmp.command("fix AVE_T all ave/time %d %d %d v_TEMP file %s" \
 if rank == 0:
     POL = np.asarray( [ 0.] + pol("displdump", a, alpha, nx, ny, nz) + [ a, a, a ] )
 #-------------------------------------------------MD SIMULATION SETTINGS
-lmp.command("velocity all create %d 146981634 dist gaussian " % (Ti) +
+lmp.command("velocity all create %d 146981634 dist gaussian " % (Tg) +
             "mom yes rot no bias yes temp CSequ")
 
 lmp.command("timestep 0.0004")
-bisect.insort(rng_T, 182.5)
-bisect.insort(rng_T, 187.5)
-bisect.insort(rng_T, 252.5)
-bisect.insort(rng_T, 257.5)
-bisect.insort(rng_T, 342.5)
-bisect.insort(rng_T, 347.5) 
-for T in rng_T:
-    lmp.command("velocity all scale %d temp CSequ" % (T) )
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+bisect.insort(Tg, 182.5)
+bisect.insort(Tg, 187.5)
+bisect.insort(Tg, 252.5)
+bisect.insort(Tg, 257.5)
+bisect.insort(Tg, 342.5)
+bisect.insort(Tg, 347.5) 
+#for T in rng_T:
+    lmp.command("velocity all scale %d temp CSequ" % (Tg) )
+    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %tequilib)
     lmp.command("unfix NPT")
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(Tg,Tg,Tdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %trun)
     lmp.command("unfix NPT")
@@ -134,7 +135,7 @@ for T in rng_T:
               [float(lat[0])/nx,float(lat[1])/ny,float(lat[2])/nz ])))
         print POL
 if rank == 0:
-    with open("%d%d%d_pol_%d_%.2f_%.2f.dat" %(nx,ny,nz, DT, Tdamp, Pdamp), 'w') as file_handle:
+    with open("%d%d%d_pol_%d_%.2f_%.2f.dat" %(nx,ny,nz, Tg, Tdamp, Pdamp), 'w') as file_handle:
         np.savetxt( file_handle, POL, delimiter='\t', header=HEADER, fmt='%.6e')
 lmp.command("unfix AVE_T")
 lmp.command("unfix AVE_ATOM")
