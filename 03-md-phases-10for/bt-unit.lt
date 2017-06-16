@@ -1,0 +1,78 @@
+# CUBIC_BaTiO3_UNIT defines a persovskite BaTiO3 base cell, which can be 
+# replicated to construct supercells and therefore for systems with periodic
+# boundaries. This file aids in creation of data files, through moltemplate, 
+# compatible with read_data in lammps. Data file is according to the 
+# using the Isotropic-anharmonic Shell Model proposed by Vielma and Schneider 
+# based on PBE Generalized Gradient Approximation(GGA) to Density Functional 
+# Theory(DFT): [Vielma Schneider 2013](http://dx.doi.org/10.1063/1.4827475)
+
+# Vishal Boddu  June 2016
+
+# Please go through README.txt before using the file
+
+# 	   AtomID		MolID	 	AtomType		    Charge        X	  Y	  Z
+Ba_ATOM{
+   create_var{$mol}
+   write("Data Atoms"){
+      $atom:BaCore	$mol:...	@atom:TYPE_BaCORE	05.042		0.0	0.0	0.0
+      $atom:BaShell	$mol:...	@atom:TYPE_BaSHELL	-2.870		0.0	0.0	0.0
+   }
+   write_once("Data Masses") {
+      @atom:TYPE_BaCORE		135.327
+      @atom:TYPE_BaSHELL	002.000
+   }
+   write("Data Bonds"){
+      $bond:BaCS	@bond:TYPE_Ba_CORESHELL_BOND	$atom:BaCore $atom:BaShell
+   }
+} # Ba_ATOM
+
+Ti_ATOM {
+   create_var{$mol}
+   write("Data Atoms"){
+      $atom:TiCore	$mol:...	@atom:TYPE_TiCORE   04.616      0.0 0.0	0.0
+      $atom:TiShell	$mol:...	@atom:TYPE_TiSHELL	-1.544		0.0	0.0	0.0   
+   }
+   write_once("Data Masses") {
+      @atom:TYPE_TiCORE		045.867
+      @atom:TYPE_TiSHELL	002.000
+   }
+   write("Data Bonds"){
+      $bond:TiCS	@bond:TYPE_Ti_CORESHELL_BOND	$atom:TiCore $atom:TiShell
+   }
+} # Ti_ATOM
+
+O_ATOM {
+   create_var{$mol}
+   write("Data Atoms"){
+      $atom:OCore	$mol:...	@atom:TYPE_OCORE	00.970		0.0	0.0	0.0
+      $atom:OShell	$mol:...	@atom:TYPE_OSHELL	-2.718		0.0	0.0	0.0
+   }
+   write_once("Data Masses") {
+      @atom:TYPE_OCORE	013.9994
+      @atom:TYPE_OSHELL	002.0000
+   }
+   write("Data Bonds"){
+      $bond:OCS	@bond:TYPE_O_CORESHELL_BOND	$atom:OCore	$atom:OShell
+   }
+} # O_ATOM
+
+
+CUBIC_BaTiO3_UNIT {
+   Ba1 = new Ba_ATOM
+   Ti1 = new Ti_ATOM.move(0.5,0.5,0.5)
+   O1  = new  O_ATOM.move(0.0,0.5,0.5)
+   O2  = new  O_ATOM.move(0.5,0.0,0.5)
+   O3  = new  O_ATOM.move(0.5,0.5,0.0)
+   write("Data CS-Info") {
+      $atom:Ba1/BaCore	$mol:Ba1
+      $atom:Ba1/BaShell	$mol:Ba1
+      $atom:Ti1/TiCore	$mol:Ti1
+      $atom:Ti1/TiShell	$mol:Ti1
+      $atom:O1/OCore	$mol:O1
+      $atom:O1/OShell	$mol:O1
+      $atom:O2/OCore	$mol:O2
+      $atom:O2/OShell	$mol:O2
+      $atom:O3/OCore	$mol:O3
+      $atom:O3/OShell	$mol:O3
+   }
+} # CUBIC_BaTiO3_UNIT
