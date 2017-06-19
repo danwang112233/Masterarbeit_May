@@ -24,8 +24,8 @@ thermo_flag = 100   # Print thermodynamics info every this many timesteps
 dump_flag   = 1000  # Write pos & displ info to file every this many timesteps
 m_iter      = 30000                 # Maximum iterations of minimizer
 ex=ey=ez    = 0.0005/math.sqrt(3.0) # Electric field vector \E - Init Pol
-Ti          = 0                     # First MD run at Ti
-DT          = 305                    # \delta T
+Ti          = 10                     # First MD run at Ti
+DT          = 15                    # \delta T
 Tf          = 20                # Last MS run at Tf-DT
 rng_T       = range(Ti,Tf,DT)       # Range of \T
 #Tg          = 10
