@@ -169,4 +169,20 @@ def find_temp( step, filename):
             print "Timestep not found in the file %s" %filename
     except IOError:
         print "The file %s cannot be accessed or not found"  %filename
-
+        
+def find_lat( step, filename):
+    d = {}
+    try:
+        with open(filename) as f:
+            for line in f:
+                l = line.strip()
+                if not l.startswith("#"):
+                    items = line.split()
+                    key, val = items[0], items[1:]
+                    d[int(key)] = val
+        if step in d:
+            return d[step]
+        else:
+            print "Timestep not found in the file %s" %filename
+    except IOError:
+        print "The file %s cannot be accessed or not found"  %filename
