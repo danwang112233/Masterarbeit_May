@@ -9,7 +9,7 @@ import os
 import sys
 rank = MPI.COMM_WORLD.Get_rank()
 #-------------------------------------------------PARSING ARGSC
-if len(sys.argv) != 6:
+if len(sys.argv) != 8:
     sys.exit(""" Usage: python mpirun.py <a> <alpha> <nx> <ny> <nz>
                 where `a` and `alpha` are lattice parameters and
                 `n` is the number of RVE replica in each direction """)
