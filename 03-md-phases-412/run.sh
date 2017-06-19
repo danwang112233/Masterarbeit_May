@@ -27,10 +27,10 @@ python molsetup.py $a $cbya $nx $ny $nz $m
 # Simulation of Rhombohedral Barium Titanate at 0K with an electric field
 # applied in [1 1 1] direction.
 
-mpirun -np 8 python 0-lmpsetup.py $a $cbya $n $m
+#mpirun -np 8 python 0-lmpsetup.py $a $cbya $n $m
 
 # NPT ensemble
-#mpirun -np 8 python 1-lmpsetup.py $a $cbya $nx $ny $nz $m $up
+mpirun -np 8 python 0-lmpsetup.py $a $cbya $nx $ny $nz $m $up
 
 #-------------------------------------------------GNUPLOT
 # Plot polarization
