@@ -10,7 +10,7 @@
     Modified: August 2016
 """
 import os, sys
-INC_PATH = "../../commons/"
+INC_PATH = "../commons/"
 sys.path.append(os.path.abspath(INC_PATH))
 
 from aux.volume import volume
