@@ -136,7 +136,7 @@ for T in rng_T:
               [float(lat[0])/nx,float(lat[1])/ny,float(lat[2])/nz ])))
         print POL
 if rank == 0:
-    with open("%d_pol_%d_%.2f_%.2f.dat" %(n, DT, Tdamp, Pdamp), 'w') as file_handle:
+    with open("%d_pol_%d_%.2f_%.2f.dat" %(nz, DT, Tdamp, Pdamp), 'w') as file_handle:
         np.savetxt( file_handle, POL, delimiter='\t', header=HEADER, fmt='%.6e')
 lmp.command("unfix AVE_T")
 lmp.command("unfix AVE_ATOM")
