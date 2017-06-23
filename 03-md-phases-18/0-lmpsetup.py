@@ -19,6 +19,7 @@ else:
     nx     =   int( str( sys.argv[3] ) )
     ny     =   int( str( sys.argv[4] ) )
     nz     =   int( str( sys.argv[5] ) )
+
 #-------------------------------------------------FULL PARAMETER LIST
 thermo_flag = 100   # Print thermodynamics info every this many timesteps
 dump_flag   = 1000  # Write pos & displ info to file every this many timesteps
@@ -110,13 +111,16 @@ bisect.insort(rng_T, 252.5)
 bisect.insort(rng_T, 257.5)
 bisect.insort(rng_T, 342.5)
 bisect.insort(rng_T, 347.5) 
+#print(rng_T)
+
+    
 for T in rng_T:
     lmp.command("velocity all scale %d temp CSequ" % (T) )
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %tequilib)
     lmp.command("unfix NPT")
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %trun)
     lmp.command("unfix NPT")
