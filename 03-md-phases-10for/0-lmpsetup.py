@@ -19,6 +19,7 @@ else:
     nx     =   int( str( sys.argv[3] ) )
     ny     =   int( str( sys.argv[4] ) )
     nz     =   int( str( sys.argv[5] ) )
+
 #-------------------------------------------------FULL PARAMETER LIST
 thermo_flag = 100   # Print thermodynamics info every this many timesteps
 dump_flag   = 1000  # Write pos & displ info to file every this many timesteps
@@ -55,12 +56,9 @@ HEADER = \
     is periodic and all its lattice parameters are allowed to vary.
     The timestep used is 0.4 fs, the system is equilibrated for 4 ps,
     followed by a simulation run of 12 ps.
-
     Coupling parameters: Tdamp = 0.1 and Pdamp = 0.1
-
     Polarization along with lattice parameters at varius temperatures are
     stored in a single file with the name n_pol_Tdamp_Pdamp.dat
-
     Vishal Boddu, %s
 """ %( datetime.now().strftime('%d-%m-%Y_%H:%M:%S') )
 #-------------------------------------------------INITIALIZATION SETTINGS
@@ -113,13 +111,16 @@ bisect.insort(rng_T, 252.5)
 bisect.insort(rng_T, 257.5)
 bisect.insort(rng_T, 342.5)
 bisect.insort(rng_T, 347.5) 
+#print(rng_T)
+
+    
 for T in rng_T:
     lmp.command("velocity all scale %d temp CSequ" % (T) )
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %tequilib)
     lmp.command("unfix NPT")
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %trun)
     lmp.command("unfix NPT")
@@ -137,8 +138,8 @@ for T in rng_T:
 if rank == 0:
     with open("%d_pol_%d_%.2f_%.2f.dat" %(n, DT, Tdamp, Pdamp), 'w') as file_handle:
         np.savetxt( file_handle, POL, delimiter='\t', header=HEADER, fmt='%.6e')
-#lmp.command("unfix AVE_T")
-#lmp.command("unfix AVE_ATOM")
-#lmp.command("unfix AVE_LAT")
+lmp.command("unfix AVE_T")
+lmp.command("unfix AVE_ATOM")
+lmp.command("unfix AVE_LAT")
 #-------------------------------------------------END LAMMPS
 MPI.Finalize()
