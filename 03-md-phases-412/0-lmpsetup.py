@@ -9,7 +9,7 @@ import os
 import sys
 rank = MPI.COMM_WORLD.Get_rank()
 #-------------------------------------------------PARSING ARGSC
-if len(sys.argv) != 8:
+if len(sys.argv) != 6:
     sys.exit(""" Usage: python mpirun.py <a> <alpha> <nx> <ny> <nz>
                 where `a` and `alpha` are lattice parameters and
                 `n` is the number of RVE replica in each direction """)
@@ -19,14 +19,15 @@ else:
     nx     =   int( str( sys.argv[3] ) )
     ny     =   int( str( sys.argv[4] ) )
     nz     =   int( str( sys.argv[5] ) )
+
 #-------------------------------------------------FULL PARAMETER LIST
 thermo_flag = 100   # Print thermodynamics info every this many timesteps
 dump_flag   = 1000  # Write pos & displ info to file every this many timesteps
 m_iter      = 30000                 # Maximum iterations of minimizer
 ex=ey=ez    = 0.0005/math.sqrt(3.0) # Electric field vector \E - Init Pol
 Ti          = 10                     # First MD run at Ti
-DT          = 15                    # \delta T
-Tf          = 20                # Last MS run at Tf-DT
+DT          = 5                    # \delta T
+Tf          = 14                # Last MS run at Tf-DT
 rng_T       = range(Ti,Tf,DT)       # Range of \T
 #Tg          = 10
 Tdamp       = 0.1
@@ -55,12 +56,9 @@ HEADER = \
     is periodic and all its lattice parameters are allowed to vary.
     The timestep used is 0.4 fs, the system is equilibrated for 4 ps,
     followed by a simulation run of 12 ps.
-
     Coupling parameters: Tdamp = 0.1 and Pdamp = 0.1
-
     Polarization along with lattice parameters at varius temperatures are
     stored in a single file with the name n_pol_Tdamp_Pdamp.dat
-
     Vishal Boddu, %s
 """ %( datetime.now().strftime('%d-%m-%Y_%H:%M:%S') )
 #-------------------------------------------------INITIALIZATION SETTINGS
@@ -113,13 +111,16 @@ bisect.insort(rng_T, 252.5)
 bisect.insort(rng_T, 257.5)
 bisect.insort(rng_T, 342.5)
 bisect.insort(rng_T, 347.5) 
+#print(rng_T)
+
+    
 for T in rng_T:
     lmp.command("velocity all scale %d temp CSequ" % (T) )
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %tequilib)
     lmp.command("unfix NPT")
-    lmp.command("fix NPT all npt temp %d %d %f tri 1. 1. %f" %(T,T,Tdamp,Pdamp))
+    lmp.command("fix NPT all npt temp %d %d %f x 1. 1. %f y 1. 1. %f xy 0.0 0.0 %f couple none" %(T,T,Tdamp,Pdamp,Pdamp,Pdamp))
     lmp.command("fix_modify NPT temp CSequ")
     lmp.command("run %d" %trun)
     lmp.command("unfix NPT")
