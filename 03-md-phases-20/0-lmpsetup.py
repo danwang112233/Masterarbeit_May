@@ -132,11 +132,11 @@ for T in rng_T:
         step = lmp.extract_variable( "STEP", "all", 0 )
         temp = float(find_temp( step, f_ave_temp))
         lat  = find_lat( step, f_ave_lat)
-        POL = np.vstack((POL, np.asarray([temp]+pol("displcoredump", a, alpha, n) + \
-              [float(lat[0])/n,float(lat[1])/n,float(lat[2])/n ])))
+        POL = np.vstack((POL, np.asarray([temp]+pol("displcoredump", a, alpha, nx, ny, nz) + \
+              [float(lat[0])/nx,float(lat[1])/ny,float(lat[2])/nz ])))
         print POL
 if rank == 0:
-    with open("%d_pol_%d_%.2f_%.2f.dat" %(n, DT, Tdamp, Pdamp), 'w') as file_handle:
+    with open("%d_pol_%d_%.2f_%.2f.dat" %(nz, DT, Tdamp, Pdamp), 'w') as file_handle:
         np.savetxt( file_handle, POL, delimiter='\t', header=HEADER, fmt='%.6e')
 lmp.command("unfix AVE_T")
 lmp.command("unfix AVE_ATOM")
