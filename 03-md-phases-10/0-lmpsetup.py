@@ -29,11 +29,11 @@ ex=ey=ez    = 0.0005/math.sqrt(3.0) # Electric field vector \E - Init Pol
 #DT          = 5                    # \delta T
 #Tf          = 14                # Last MS run at Tf-DT
 #rng_T       = range(Ti,Tf,DT)       # Range of \T
-Tg          = 10
+Tg          = 5
 Tdamp       = 0.1
 Pdamp       = 0.1
 tequilib    = 10000
-trun        = 30000
+trun        = 10000
 #-------------------------------------------------DATA FILE NAMES
 f_ave_temp  = "ave_temp"
 f_ave_lat   = "ave_lat"
