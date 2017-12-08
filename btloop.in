@@ -1,0 +1,154 @@
+# Input file for lammps simulation using Isotropic-anharmonic Shell Model
+# proposed by Vielma and Schneider based on PBE Generalized Gradient 
+# Approximation(GGA) to Density Functional Theory(DFT): 
+# [Vielma Schneider 2013](http://dx.doi.org/10.1063/1.4827475)
+
+# Vishal Boddu, June 2016
+# Dan, May 2017
+
+
+#-------------------------------------------------PARSING ARGSC
+
+
+
+
+
+variable a internal 4.010
+variable alpha internal 89.81
+
+#'a` and `alpha` are lattice parameters
+
+variable nx internal 2
+variable ny internal 2
+variable nz internal 2
+
+#`n` is the number of RVE replica in each direction
+
+
+#-------------------------------------------------SIMULATION BOX SETTINGS
+variable lla equal v_a*v_nx
+variable llb equal v_a*v_ny
+variable llc equal v_a*v_nz
+
+
+variable alpha_r equal ${alpha}*PI/180.0
+variable XY_DELTA equal v_llc*cos(${alpha_r})
+variable YZ_DELTA equal v_lla*cos(${alpha_r})
+variable XZ_DELTA equal v_llb*cos(${alpha_r})#correct till now
+variable ext equal 0.0005
+variable ex equal $(v_ext)/sqrt(3.0)
+variable ey equal $(v_ext)/sqrt(3.0)
+variable ez equal $(v_ext)/sqrt(3.0)
+
+
+
+# ------------------------ INITIALIZATION ---------------------------------
+
+units 		metal
+dimension	3
+boundary	p	p	s
+atom_style	full
+
+# ----------------------- ATOM DEFINITION ----------------------------
+
+fix csinfo all property/atom i_CSID
+read_data atom.data fix csinfo NULL CS-Info
+
+#change_box all x scale ${a} y scale ${b} z scale ${c} remap
+#change_box all triclinic xy delta ${XY} xz delta ${XZ} yz delta ${YZ} remap
+#change_box all triclinic xy delta 0.0 xz delta 0.0 yz delta 0.0 remap
+
+group cores type 1 3 5
+group shells type 2 4 6
+
+neighbor 0.5 bin
+neigh_modify delay 10 check yes
+comm_modify vel yes
+
+# ------------------------ FORCE FIELDS ------------------------------
+
+#kspace_style ewald 1.0e-6
+#pair_style   born/coul/long/cs 7.0
+pair_style born/coul/wolf/cs 0.25 16 14.5
+
+#------------------------ A,  rho, sigma=0,     C,      D 
+pair_coeff	*	*	 0.0000	1.0000	0.000	0.0000	0.000
+pair_coeff	2	6	1061.3	0.3740	0.000	0.0000	0.000 #864.536 0.38729 0.000	0.0000	0.000
+pair_coeff	4	6	3769.93	0.2589	0.000	0.0000	0.000 #4526.635 0.25239 0.000	0.0000	0.000
+pair_coeff	6	6	4740.00	0.2686	0.000	160.00	0.000	#4102.743 0.29581 0.000	300.00	0.000
+pair_modify tail no
+
+bond_style class2
+bond_coeff	1	0.0	125.9	0.000	0.000
+bond_coeff	2	0.0	161.0	0.000	20.833
+bond_coeff	3	0.0	15.5	0.0	166.67
+#bond_style class2
+#bond_coeff	2	0.0	161.0	0.000	20.833
+#-------------------------------------------------INITIALIZATION SETTINGS
+change_box all triclinic xy delta $(v_XY_DELTA) yz delta $(v_YZ_DELTA) xz delta $(v_XZ_DELTA) remap
+
+compute dr all displace/atom
+#compute er all chargedisplace/atom
+reset_timestep 0
+dump dump_positions all atom 1000 atomdump
+
+
+dump dump_displace all custom 1000 displdump id type q c_dr[1] c_dr[2] c_dr[3]
+
+
+#-------------------------------------------------FULL PARAMETER LIST
+
+#-------------------------------------------------OUTPUT CONTROL SETTINGS
+thermo 100
+thermo_style custom step etotal pe ke ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
+compute CSequ all temp/cs cores shells
+thermo_modify temp CSequ
+
+
+
+#reset_timestep 0
+fix ef all efield $(v_ex) $(v_ey) $(v_ez)
+print " electric field strength = $(v_ext)"
+fix_modify ef energy yes
+min_style fire
+minimize 0.0 1e-07 30000 100000
+min_style quickmin
+minimize 0.0 1e-07 30000 100000
+unfix ef
+
+reset_timestep 0
+
+fix AVE_LAT all ave/time 1 10000 20000 $(v_lla) $(v_llb) $(v_llc) file ave_lat
+fix AVE_ATOM all ave/atom 1 10000 20000 c_dr[1] c_dr[2] c_dr[3]
+dump core_displ all custom 20000 displcoredump id type f_AVE_ATOM[1] f_AVE_ATOM[2] f_AVE_ATOM[3]             
+variable TEMP equal temp
+fix AVE_T all ave/time 1 10000 20000 v_TEMP file ave_temp
+
+label loop
+variable tt loop 1 40
+variable ti equal $(v_tt)*10
+velocity all create $(v_ti) 146981634 dis gaussian mom yes rot no bias yes temp CSequ
+timestep 0.00001
+
+#min_style fire
+#minimize 0.0 1e-05 60000 10000
+#reset_timestep 0
+compute pol all polar/atom
+#reset_timestep 0
+dump dump_pol all custom 100 poldump id type c_pol[1] c_pol[2] c_pol[3]
+velocity all scale $(v_ti) temp CSequ
+fix NPT all npt temp $(v_ti) $(v_ti) 0.1 x 1. 1. 0.1 y 1. 1. 0.1 xy 0.0 0.0 0.1 couple none
+fix_modify NPT temp CSequ
+run 10000
+unfix NPT
+fix NPT all npt temp $(v_ti) $(v_ti) 0.1 x 1. 1. 0.1 y 1. 1. 0.1 xy 0.0 0.0 0.1 couple none
+fix_modify NPT temp CSequ
+run 10000
+unfix NPT
+clear
+next tt
+jump btloop.in loop
+
+unfix AVE_T
+unfix AVE_ATOM
+unfix AVE_LAT
